@@ -16,8 +16,13 @@ keywords = []
 license = "LICENSE"
 license-files = ["LICENSE"]
 
-requires-python = '>=3.14'
-dependencies = []
+requires-python = '>=3.13'
+dependencies = [
+    "aiogram>=3.22.0",
+    "camoufox[geoip]>=0.4.11",
+    "python-dotenv>=1.2.1",
+    "selectolax>=0.4.4",
+]
 
 
 
@@ -148,7 +153,7 @@ extend-select = []
 ignore = [
     "D212", "D205", "D413", "D411", "D410",  # Because I like this format: """\n{description}\n\nArgs:{args}\nReturn:{return}\nRaises:{raises}
     "D203", "COM812",  # By my preferences
-    "TD002", "TD003",  # Unnecessarily
+    "TD002", "TD003", "G004",  # Unnecessarily
     "FIX002",  # Unnecessarily now
 ]
 
@@ -403,7 +408,7 @@ analyzeUnannotatedFunctions = true
 defineConstant = {}
 useLibraryCodeForTypes = true
 
-pythonVersion = "3.14"
+pythonVersion = "3.13"
 pythonPlatform = "Linux"
 executionEnvironments = []
 

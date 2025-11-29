@@ -1,5 +1,6 @@
 """https://nox.thea.codes/en/stable/ sessions."""
 
+# Because Nox itself uses more old than 3.14 python
 from __future__ import annotations
 
 import shutil
@@ -42,25 +43,29 @@ def lint(session: Session) -> None:
     session.install(*get_dependencies("lint"))
     session.run("ruff", "format", ".")
     session.run("ruff", "check", ".")
-    session.run("basedpyright", ".", success_codes=[0, 1])  # To use commit
-    # session with errors
+    session.run("basedpyright", ".", success_codes=[0])  # [0,1] to use commit
+    # session with type errors
 
 
 @nox.session
-def clean(session: Session) -> None:
-    """Clean all unnecessery files before commiting."""
+def clean(session: Session) -> None:  # noqa: ARG001
+    """Clean all unnecessery and temporary files before commiting."""
     paths_to_remove = [
         Path(".nox"),
         Path(".ruff_cache"),
+        Path(".venv"),
+        Path("links.txt"),
     ]
 
     pycache_dirs = list(Path().glob("**/__pycache__"))
     paths_to_remove.extend(pycache_dirs)
 
     for path in paths_to_remove:
-        if path.exists() and path.is_dir():
-            session.log(f"Removing {path}")
-            shutil.rmtree(path)
+        if path.exists():
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
 
 
 @nox.session
