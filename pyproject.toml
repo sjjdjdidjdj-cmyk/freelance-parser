@@ -18,3 +18,408 @@ license-files = ["LICENSE"]
 
 requires-python = '>=3.14'
 dependencies = []
+
+
+
+[project.optional-dependencies]
+lint = ["ruff", "basedpyright"]
+all = ["laborx-parser[lint]"]
+
+
+
+[tool.commitizen]  # https://commitizen-tools.github.io/commitizen/config/
+# Commit
+allowed_prefixes = []  # ["Merge", "Revert", "Pull request", "fixup!", "squash!"]
+
+gpg_sign = true
+annotated_tag = false
+
+retry_after_failure = true
+allow_abort = false
+
+legacy_tag_formats = []
+ignored_tag_formats = []
+
+# Version
+version = '0.0.0'
+tag_format = 'v$version'
+
+version_files = ['pyproject.toml:version']
+
+name = 'cz_conventional_commits'
+version_scheme = 'pep440'
+
+version_provider = 'commitizen'
+
+# Bump
+update_changelog_on_bump = true
+changelog_file = 'CHANGELOG.md'
+changelog_incremental = true
+
+# changelog_format: str
+# changelog_start_rev: str
+
+bump_message = 'bump: version $current_version → $new_version'
+
+major_version_zero = true
+prerelease_offset = 0
+
+pre_bump_hooks = []
+post_bump_hooks = []
+
+## Other
+style = []
+customize = {}
+extras = {}
+
+use_shortcuts = false
+# template: str
+encoding = 'utf-8'
+
+
+
+[tool.ruff]  # https://docs.astral.sh/ruff/settings
+preview = false
+line-length = 79
+
+respect-gitignore = true
+exclude = [".git", ".ruff_cache", ".venv", "archive"]  # Let it will be dirs and not changed
+extend-exclude = []                         # And it - some specific files
+
+include = ["*.py", "**/pyproject.toml"]     # same logic as exclude and extend-exclude
+extend-include = []                         # same also will be everywhere in `tool.ruff`
+
+required-version = ">=0.14.2"
+# target-version: str  # Ruff uses [project].requires-python
+
+indent-width = 4
+
+fix = true
+show-fixes = true
+unsafe-fixes = true
+
+fix-only = false
+output-format = "concise"  # For string-links
+
+builtins = []
+namespace-packages = []
+per-file-target-version = {}
+
+src = [".", "src"]
+cache-dir = ".ruff_cache"
+
+force-exclude = true
+
+# extend: str
+
+# [tool.ruff.analyze]  # Don't used
+
+[tool.ruff.format]
+preview = false
+
+docstring-code-format = false
+# docstring-code-line-length = "dinamic"
+
+exclude = ["pyproject.toml"]
+
+indent-style = "space"
+line-ending = 'lf'
+quote-style = "double"
+
+skip-magic-trailing-comma = false
+
+
+[tool.ruff.lint]
+preview = false
+typing-extensions = false
+
+logger-objects = []
+typing-modules = []
+task-tags = ['TODO']
+allowed-confusables = []
+dummy-variable-rgx = "^_$"
+
+explicit-preview-rules = false
+
+external = []
+
+select = ["ALL"]
+extend-select = []
+ignore = [
+    "D212", "D205", "D413", "D411", "D410",  # Because I like this format: """\n{description}\n\nArgs:{args}\nReturn:{return}\nRaises:{raises}
+    "D203", "COM812",  # By my preferences
+    "TD002", "TD003",  # Unnecessarily
+    "FIX002",  # Unnecessarily now
+]
+
+fixable = ["ALL"]
+extend-fixable = []
+unfixable = []
+
+extend-safe-fixes = []
+extend-unsafe-fixes = []
+
+per-file-ignores = {}
+extend-per-file-ignores = {}
+
+exclude = []
+
+future-annotations = false
+
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+ignore-fully-untyped = false
+mypy-init-return = false
+
+suppress-dummy-args = true
+suppress-none-returning = true
+
+
+[tool.ruff.lint.flake8-bandit]
+allowed-markup-calls = []
+check-typed-exception = true
+extend-markup-names = []
+
+hardcoded-tmp-directory = []
+hardcoded-tmp-directory-extend = []
+
+
+[tool.ruff.lint.flake8-boolean-trap]
+extend-allowed-calls = []
+
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = []
+
+
+[tool.ruff.lint.flake8-builtins]
+allowed-modules = []
+ignorelist = []
+strict-checking = true
+
+
+[tool.ruff.lint.flake8-comprehensions]
+allow-dict-calls-with-keyword-arguments = false
+
+
+[tool.ruff.lint.flake8-copyright]
+author = "Misha Rasskazov"
+min-file-size = 0
+notice-rgx = '(?i)Copyright\s+((?:\(C\)|©)\s+)?\d{4}((-|,\s)\d{4})'
+
+
+[tool.ruff.lint.flake8-errmsg]
+max-string-length = 20
+
+
+[tool.ruff.lint.flake8-gettext]
+extend-function-names = []
+function-names = ["_", "gettext", "ngettext"]
+
+
+[tool.ruff.lint.flake8-implicit-str-concat]
+allow-multiline = false
+
+
+[lint.flake8-import-conventions]
+aliases = {"altair" = "alt", "matplotlib" = "mpl", "matplotlib.pyplot" = "plt", "numpy" = "np", "numpy.typing" = "npt", "pandas" = "pd", "seaborn" = "sns", "tensorflow" = "tf", "tkinter" = "tk", "holoviews" = "hv", "panel" = "pn", "plotly.express" = "px", "polars" = "pl", "pyarrow" = "pa", "xml.etree.ElementTree" = "ET"}
+banned-from = []
+
+extend-aliases = {}
+banned-aliases = {}
+
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+parametrize-names-type = "tuple"
+parametrize-values-row-type = "tuple"
+parametrize-values-type = "list"
+
+raises-extend-require-match-for = []
+raises-require-match-for = ["BaseException", "Exception", "ValueError", "OSError", "IOError", "EnvironmentError", "socket.error"]
+
+warns-extend-require-match-for = []
+warns-require-match-for = ["Warning", "UserWarning", "DeprecationWarning"]
+
+
+[tool.ruff.lint.flake8-quotes]
+avoid-escape = true
+
+docstring-quotes = "double"
+inline-quotes = "double"
+multiline-quotes = "double"
+
+
+[tool.ruff.lint.flake8-self]
+extend-ignore-names = []
+ignore-names = ["_make", "_asdict", "_replace", "_fields", "_field_defaults", "_name_", "_value_"]
+
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+banned-module-level-imports = []
+
+
+# [tool.ruff.lint.flake8-tidy-imports.banned-api]
+# ...
+
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+exempt-modules = ["typing", "typing_extensions"]
+quote-annotations = false
+
+runtime-evaluated-base-classes = []
+runtime-evaluated-decorators = []
+
+
+[tool.ruff.lint.flake8-unused-arguments]
+ignore-variadic-names = false
+
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+order-by-type = true
+
+combine-as-imports = false
+split-on-trailing-comma = true
+
+classes = []
+constants = []
+extra-standard-library = []
+
+sections = {}
+no-sections = false
+from-first = false
+default-section = "third-party"
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+detect-same-package = true
+
+force-single-line = false
+force-sort-within-sections = false
+force-to-top = []
+force-wrap-aliases = false
+forced-separate = []
+
+known-first-party = ["world", "type", "properties", "logic", "base"]
+known-local-folder = []
+known-third-party = []
+
+length-sort = true
+length-sort-straight = true
+
+lines-after-imports = -1
+lines-between-types = 1
+no-lines-before = []
+
+relative-imports-order = "furthest-to-closest"
+required-imports = []
+single-line-exclusions = []
+variables = []
+
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = []
+extend-ignore-names = []
+ignore-names = []
+staticmethod-decorators = []
+
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = false
+max-doc-length = 79
+
+
+[tool.ruff.lint.pydoclint]
+ignore-one-line-docstrings = false
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+ignore-decorators = []
+ignore-var-parameters = false
+property-decorators = []
+
+
+[tool.ruff.lint.pyflakes]
+allowed-unused-imports = []
+extend-generics = []
+
+
+[tool.ruff.lint.pylint]
+allow-dunder-method-names = []
+allow-magic-value-types = ["str", "bytes"]
+
+max-args = 5
+max-bool-expr = 5
+max-branches = 12
+max-locals = 15
+max-nested-blocks = 5
+max-positional-args = 5
+max-public-methods = 20
+max-returns = 6
+max-statements = 50
+
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+
+[tool.ruff.lint.ruff]
+parenthesize-tuple-in-subscript = true
+
+
+
+[tool.basedpyright]  # https://docs.basedpyright.com/latest/configuration/config-files/
+# Paths
+include = ["src"]
+exclude = ["**/__pycache__", '**/.venv', '**/.nox', "archive", "noxfile.py"]
+strict = []
+ignore = []
+# extends: str
+# typeshedPath: str
+# stubPath: str
+# extraPaths: str
+# baselineFile: str
+
+# Execution
+verboseOutput = true
+typeCheckingMode = 'all'
+
+enableExperimentalFeatures = false
+deprecateTypingAliases = true
+
+failOnWarnings = true
+analyzeUnannotatedFunctions = true
+
+defineConstant = {}
+useLibraryCodeForTypes = true
+
+pythonVersion = "3.14"
+pythonPlatform = "Linux"
+executionEnvironments = []
+
+allowedUntypedLibraries = []
+
+# Ruling
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+
+strictParameterNoneValue = true
+disableBytesTypePromotions = true
+
+strictGenericNarrowing = true
+enableBasedFeatures = true
+
+reportImplicitRelativeImport = false
+reportMissingTypeStubs = false
+reportImportCycles = false
