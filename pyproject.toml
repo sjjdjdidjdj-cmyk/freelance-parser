@@ -1,0 +1,20 @@
+[project]  # https://packaging.python.org/en/latest/specifications/pyproject-toml/
+name = 'laborx-parser'
+version = '0.0.0'
+description = 'LaborX Parser'
+readme = 'README.md'
+
+authors = [
+    {name = 'Misha Rasskazov', email = 'itsnotgmain239@gmail.com'}
+]
+maintainers = [
+    {name = 'Misha Rasskazov', email = 'itsnotgmain239@gmail.com'}
+]
+
+keywords = []
+
+license = "LICENSE"
+license-files = ["LICENSE"]
+
+requires-python = '>=3.14'
+dependencies = []
