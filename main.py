@@ -15,10 +15,9 @@ from pathlib import Path
 
 from dotenv import get_key
 from aiogram import Bot
-from camoufox import AsyncCamoufox
+from aiohttp import ClientSession
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from selectolax.lexbor import LexborHTMLParser
-from playwright.async_api import Page
 
 URL = "https://laborx.com/jobs"
 SLEEP_BETWEEN_INTERACTIONS = 180
@@ -73,20 +72,14 @@ class Parser:
 
         while True:
             try:
-                async with AsyncCamoufox(
-                    firefox_user_prefs={
-                        "network.proxy.type": 0,
-                    },
-                    headless=True,
-                ) as browser:
-                    logger.info("Started new browser.")
+                async with ClientSession() as client:
+                    logger.info("Started new ClientSession.")
                     new_links: set[str] = set()
 
-                    page = await browser.new_page()
-                    _ = await page.goto(URL)
+                    r = await client.get(URL)
                     logger.info(f"On {URL}")
 
-                    for node in LexborHTMLParser(await page.content()).css(
+                    for node in LexborHTMLParser(await r.text()).css(
                         ".root.job-card.child-card"
                     ):
                         try:
@@ -105,7 +98,7 @@ class Parser:
                             )
 
                     for link in new_links:
-                        await self._parse_link(page, link)
+                        await self._parse_link(client, link)
 
                         links.add(link)
                         with Path("links.txt").open("a") as file:  # noqa: ASYNC230
@@ -116,73 +109,71 @@ class Parser:
             except BaseException:
                 logger.exception("Critical error of work:")
 
-    async def _parse_link(self, page: Page, link: str):
-        for attempt in range(4):
-            logger.info(f"Parsing new link {link} attempt {attempt}")
+    async def _parse_link(self, client: ClientSession, link: str):
+        logger.info(f"Parsing new link {link}")
+
+        try:
+            r = await client.get(link)
+            parser = LexborHTMLParser(await r.text())
+
+            title = parser.css_first(".job-name").text().strip()
+            publish_date = parser.css_first(".publish-date").text().strip()
+            price = parser.css_first(".info-value").text().strip() + " $"
+
+            user: str = (  # pyright: ignore[reportOperatorIssue, reportUnknownVariableType]
+                "https://laborx.com"
+                + parser.css_first(".user-name.link").attributes["href"]
+            )
+
+            skills: list[str] = [
+                skill.text().strip()
+                for skill in parser.css_first(".skills-container").css(
+                    ".tag.clickable"
+                )
+            ]
+
             try:
-                _ = await page.goto(link)
-
-                await asyncio.sleep(delay=cast("int", 2**attempt))
-
-                parser = LexborHTMLParser(await page.content())
-
-                title = parser.css_first(".job-name").text().strip()
-                description = parser.css_first(".description")
-                description = description.html
-                description = re.sub(  # pyright: ignore[reportUnknownVariableType, reportCallIssue]
-                    r"<br\s*/?>",
-                    "\n",
-                    description,  # pyright: ignore[reportArgumentType]
-                    flags=re.IGNORECASE,
+                end_date = (
+                    parser.css_first(".info-item.day-info")
+                    .css_first(".gray-info")
+                    .text()
+                    .strip()
+                    .removeprefix("(till")
+                    .rstrip(")")
+                    .strip()
                 )
-                description = re.sub(
-                    r"</p>",
-                    "\n",
-                    description,  # pyright: ignore[reportUnknownArgumentType]
-                    flags=re.IGNORECASE,
-                )
-                description = re.sub(r"<[^>]+>", "", description)
-                description = html.unescape(description).strip()
+            except (KeyError, TypeError, AttributeError):
+                end_date = "Not established"
 
-                publish_date = parser.css_first(".publish-date").text().strip()
-                try:
-                    end_date = (
-                        parser.css_first(".info-item.day-info")
-                        .css_first(".gray-info")
-                        .text()
-                        .strip()
-                        .removeprefix("(till")
-                        .rstrip(")")
-                        .strip()
-                    )
-                except (KeyError, TypeError, AttributeError):
-                    end_date = "Not established"
-                price = parser.css_first(".info-value").text().strip() + " $"
-                user: str = (  # pyright: ignore[reportOperatorIssue, reportUnknownVariableType]
-                    "https://laborx.com"
-                    + parser.css_first(".user-name.link").attributes["href"]
-                )
+            description = parser.css_first(".description")
+            description = description.html
+            description = re.sub(  # pyright: ignore[reportUnknownVariableType, reportCallIssue]
+                r"<br\s*/?>",
+                "\n",
+                description,  # pyright: ignore[reportArgumentType]
+                flags=re.IGNORECASE,
+            )
+            description = re.sub(
+                r"</p>",
+                "\n",
+                description,  # pyright: ignore[reportUnknownArgumentType]
+                flags=re.IGNORECASE,
+            )
+            description = re.sub(r"<[^>]+>", "", description)
+            description = html.unescape(description).strip()
 
-                skills: list[str] = [
-                    skill.text().strip()
-                    for skill in parser.css_first(".skills-container").css(
-                        ".tag.clickable"
-                    )
-                ]
-                await self._send_message(
-                    link=link,
-                    title=title,
-                    description=description,
-                    publish_date=publish_date,
-                    end_date=end_date,
-                    price=price,
-                    user=cast("str", user),
-                    skills=skills,
-                )
-            except Exception:
-                logger.exception(f"Error parsing new link {link}")
-            else:
-                break
+            await self._send_message(
+                link=link,
+                title=title,
+                description=description,
+                publish_date=publish_date,
+                end_date=end_date,
+                price=price,
+                user=cast("str", user),
+                skills=skills,
+            )
+        except Exception:
+            logger.exception(f"Error parsing new link {link}")
 
     async def _send_message(  # noqa: PLR0913
         self,
@@ -229,14 +220,14 @@ class Parser:
                     reply_markup=keyboard,
                 )
             except Exception:
-                logger.exception(f"Ошибка отправления сообщения {admin_id}")
+                logger.exception(f"Error sending {admin_id}")
 
 
 async def main() -> None:
     """Point of entry."""
     parser = Parser()
     await parser.start_parsing()
-    await asyncio.sleep(99999)
+    await asyncio.sleep(99999999)
 
 
 if __name__ == "__main__":

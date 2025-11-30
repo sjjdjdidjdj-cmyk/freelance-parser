@@ -1,5 +1,5 @@
 # Services
-* [github.com](https://github.com)
+* [github.com](https://github.com/)
 
 # Tools
 * [Git](https://git-scm.com/)
@@ -12,5 +12,5 @@
 # Libraries
 * [python-dotenv](https://pypi.org/project/python-dotenv/)
 * [Aiogram](https://aiogram.dev/)
-* [Camoufox](https://github.com/daijro/camoufox)
-* [Selectolax](https://github.com/rushter/selectolax)
+* [Aiohttp](https://docs.aiohttp.org/en/stable/)
+* [Selectolax](https://github.com/rushter/selectolax/)
